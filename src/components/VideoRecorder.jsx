@@ -37,29 +37,31 @@ const VideoRecorder = () => {
       mediaRecorderRef.current.stop();
     };
   
-    const sendVideo = (videoBlob) => {
+    const sendVideo = async (videoBlob) => {
         const formData = new FormData();
         formData.append("video", videoBlob, "capture.webm");
-      
-        axios
-          .post("http://127.0.0.1:5000/upload", formData, {
-            headers: {
-              "Content-Type": "multipart/form-data",
-            },
-          })
-          .then((response) => {
-            console.log("Video uploaded successfully:", response.data);
+
+        try{
+        const response= await axios
+        .post("http://127.0.0.1:5000/upload", formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        })
+        console.log("Video uploaded successfully:", response.data);
             setAccuracy(response.data.accuracy); 
-          })
-          .catch((error) => {
-            console.error("Error uploading video:", error);
-          });
+        }
+        catch(err){
+          console.log("something went wrong",err)
+        }
+      
+     
       };
   
     return (
       <div className="flex flex-col items-center">
         <Webcam
-          audio={true}
+          audio={false}
           ref={webcamRef}
           videoConstraints={videoConstraints}
           mirrored={!isBackCamera}
