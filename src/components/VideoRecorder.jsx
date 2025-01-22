@@ -38,25 +38,30 @@ const VideoRecorder = () => {
     };
   
     const sendVideo = async (videoBlob) => {
-        const formData = new FormData();
-        formData.append("video", videoBlob, "capture.webm");
-
-        try{
-        const response= await axios
-        .post("http://127.0.0.1:5000/upload", formData, {
+      const formData = new FormData();
+      formData.append("video", videoBlob, "capture.webm");
+    
+      try {
+        const response = await fetch("http://127.0.0.1:5000/upload", {
+          method: "POST",
+          body: formData,
           headers: {
-            "Content-Type": "multipart/form-data",
+            // No need to manually set Content-Type for FormData; the browser handles it.
           },
-        })
-        console.log("Video uploaded successfully:", response.data);
-            setAccuracy(response.data.accuracy); 
+        });
+    
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
         }
-        catch(err){
-          console.log("something went wrong",err)
-        }
-      
-     
-      };
+    
+        const data = await response.json();
+        console.log("Video uploaded successfully:", data);
+        setAccuracy(data.average_accuracy);
+      } catch (err) {
+        console.log("Something went wrong", err);
+      }
+    };
+    
   
     return (
       <div className="flex flex-col items-center">
