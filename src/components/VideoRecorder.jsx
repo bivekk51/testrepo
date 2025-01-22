@@ -42,13 +42,14 @@ const VideoRecorder = () => {
       formData.append("video", videoBlob, "capture.webm");
     
       try {
-        const response = await fetch("/upload", {
+        const response = await fetch("/api/upload", {
           method: "POST",
           body: formData,
           headers: {
             // No need to manually set Content-Type for FormData; the browser handles it.
           },
         });
+        
     
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
