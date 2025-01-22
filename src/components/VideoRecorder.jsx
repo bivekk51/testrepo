@@ -42,7 +42,7 @@ const VideoRecorder = () => {
       formData.append("video", videoBlob, "capture.webm");
     
       try {
-        const response = await fetch("http://192.168.1.78:5000/upload", {
+        const response = await fetch("/upload", {
           method: "POST",
           body: formData,
           headers: {
