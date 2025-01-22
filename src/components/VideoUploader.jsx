@@ -1,74 +1,101 @@
-import React, { useState } from 'react';
-
-const VideoUploader = () => {
-  const [selectedFile, setSelectedFile] = useState(null);
-  const [accuracy, setAccuracy] = useState(null);
-  const [errorMessage, setErrorMessage] = useState("");
-
-  const handleFileChange = (event) => {
-    const file = event.target.files[0];
-    if (file && file.type.startsWith("video/")) {
-      setSelectedFile(file);
-      setErrorMessage("");
-    } else {
-      setErrorMessage("Please select a valid video file.");
-    }
-  };
-
-  const uploadVideo = async () => {
-    if (!selectedFile) {
-      setErrorMessage("No video file selected.");
-      return;
-    }
-
-    const formData = new FormData();
-    formData.append("video", selectedFile);
-
-    try {
-      const response = await fetch("http://127.0.0.1:5000/upload", {
-        method: "POST",
-        body: formData,
+import React,{useState,useRef} from 'react'
+import axios from 'axios'
+import Webcam from 'react-webcam';
+const VideoRecorder = () => {
+    const webcamRef = useRef(null);
+    const mediaRecorderRef = useRef(null);
+    const [recording, setRecording] = useState(false);
+    const [isBackCamera, setIsBackCamera] = useState(false);
+    const [accuracy, setAccuracy] = useState(null);
+  
+    const videoConstraints = {
+      facingMode: isBackCamera ? "environment" : "user", 
+    };
+  
+    const startRecording = () => {
+      setRecording(true);
+      mediaRecorderRef.current = new MediaRecorder(webcamRef.current.stream, {
+        mimeType: "video/webm",
       });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+  
+      const chunks = [];
+      mediaRecorderRef.current.ondataavailable = (event) => {
+        chunks.push(event.data);
+      };
+  
+      mediaRecorderRef.current.onstop = () => {
+        const videoBlob = new Blob(chunks, { type: "video/webm" });
+        sendVideo(videoBlob);
+      };
+  
+      mediaRecorderRef.current.start();
+      setTimeout(() => stopRecording(), 5000); 
+    };
+  
+    const stopRecording = () => {
+      setRecording(false);
+      mediaRecorderRef.current.stop();
+    };
+  
+    const sendVideo = async (videoBlob) => {
+      const formData = new FormData();
+      formData.append("video", videoBlob, "capture.webm");
+    
+      try {
+        const response = await fetch("http://192.168.1.78:5000/upload", {
+          method: "POST",
+          body: formData,
+          headers: {
+            // No need to manually set Content-Type for FormData; the browser handles it.
+          },
+        });
+    
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+    
+        const data = await response.json();
+        console.log("Video uploaded successfully:", data);
+        setAccuracy(data.average_accuracy);
+      } catch (err) {
+        console.log("Something went wrong", err);
       }
-
-      const data = await response.json();
-      console.log("Video uploaded successfully:", data);
-      setAccuracy(data.highest_accuracy);
-    } catch (error) {
-      console.error("Error uploading video:", error);
-      setErrorMessage("Failed to upload the video. Please try again.");
-    }
-  };
-
-  return (
-    <div className="flex flex-col items-center mt-20">
-      <h2 className="text-2xl font-bold mb-4">Video Uploader</h2>
-      <input
-        type="file"
-        accept="video/*"
-        onChange={handleFileChange}
-        className="mb-4"
-      />
-      {errorMessage && <p className="text-red-500 mb-4">{errorMessage}</p>}
-      <button
-        onClick={uploadVideo}
-        className="bg-blue-500 text-white px-4 py-2 rounded cursor-pointer hover:bg-blue-900"
-        disabled={!selectedFile}
-      >
-        Upload Video
-      </button>
-      {accuracy !== null && (
-        <div className="mt-4">
-          <h3>
-            Accuracy: {accuracy > 0.5 ? "✅ High" : "❌ Low"} ({accuracy})
-          </h3>
+    };
+    
+  
+    return (
+      <div className="flex flex-col items-center">
+        <Webcam
+          audio={false}
+          ref={webcamRef}
+          videoConstraints={videoConstraints}
+          mirrored={!isBackCamera}
+          className="w-full max-w-md"
+        />
+        <div className="mt-4 flex gap-4">
+          <button
+            onClick={startRecording}
+            disabled={recording}
+            className="bg-blue-500 text-white px-4 py-2 rounded"
+          >
+            {recording ? "Recording..." : "Start Recording"}
+          </button>
+          <button
+            onClick={() => setIsBackCamera((prev) => !prev)}
+            className="bg-gray-500 text-white px-4 py-2 rounded"
+          >
+            Switch to {isBackCamera ? "Front" : "Back"} Camera
+          </button>
         </div>
-      )}
-    </div>
-  );
-};
+        {accuracy !== null && (
+            <div className="mt-4">
+                <h3>Accuracy: {accuracy > 0.5 ? "✅ High" : "❌ Low"} ({accuracy})</h3>
+            </div>
+        )}
 
-export default VideoUploader;
+      </div>
+
+    );
+}
+
+export default VideoRecorder
