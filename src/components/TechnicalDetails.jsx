@@ -42,8 +42,8 @@ const TechnicalDetails = () => {
         <li><span className="font-bold">video.py:</span> Loads the AI model and processes video frames to detect violent activities.</li>
       </ul>
       
-      <div className="w-full h-40 bg-gray-200 flex items-center justify-center mb-6">
-        <p className="text-gray-500">[Backend Processing Image]</p>
+      <div className="w-full h-72 flex items-center justify-center mb-6">
+        <img src="/src/assets/backend .svg" alt="" className='h-72' />
       </div>
 
       <h2 className="text-2xl font-semibold mb-3">Model Workflow</h2>
@@ -57,10 +57,7 @@ const TechnicalDetails = () => {
         - If the <span className="font-bold">average_accuracy</span> exceeds <span className="font-bold">0.5</span>, an alert is triggered and a message is sent via the configured channel (Telegram, Email, or SMS).
       </p>
       
-      <div className="w-full h-40 bg-gray-200 flex items-center justify-center mb-6">
-        <p className="text-gray-500">[Model Workflow Image]</p>
-      </div>
-
+      
       <h2 className="text-2xl font-semibold mb-3">Alert Mechanism</h2>
       <p className="mb-4">
         If violence is detected with an average accuracy &gt; 0.5, an alert is sent to configured channels:
