@@ -18,8 +18,8 @@ const TechnicalDetails = () => {
         This ensures real-time feedback and alerts once the video is analyzed.
       </p>
       
-      <div className="w-full h-40 bg-gray-200 flex items-center justify-center mb-6">
-        <p className="text-gray-500">[Frontend API Flow Image]</p>
+      <div className="w-full h-72 flex items-center justify-center mb-6">
+        <img src="/src/assets/frontend.png" alt="" className='h-72' />
       </div>
 
       <h2 className="text-2xl font-semibold mb-3">API Call Flow</h2>
